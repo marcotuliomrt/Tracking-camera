@@ -8,9 +8,9 @@ import numpy as np
 
 # --------------------------     arguments      --------------------------------------------------------------
 
-x_cam = 640
-y_cam = 460
-sections = 10
+x_cam = 640  # image width
+y_cam = 460  # image lengh 
+sections = 10  # number od sections the image is being devided (the resolution the the tracking)
 
 # Precision: fraction of the screen size that the object been tracked can move without activating the camera movement
 x_precision = 0.6
@@ -177,7 +177,7 @@ def main_func():
                         if (abs(5 - buffer_x[1]) >= (1 - x_precision)*sections/2) | (abs(5 - buffer_y[1]) >= (1 - y_precision)*sections/2):
                             # Sends the coordinates to the serial port
                             ser.write(intervals)
-                            print(intervals)
+                            #print(intervals)
                                                     
                             
 
