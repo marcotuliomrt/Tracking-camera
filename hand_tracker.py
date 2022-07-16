@@ -6,19 +6,45 @@ import time
 import serial.tools.list_ports
 import numpy as np
 
-# --------------------------     arguments      --------------------------------------------------------------
+# ----------------------------     arguments      ------------------------------------------------------------
 
 x_cam = 640  # image width
 y_cam = 460  # image lengh 
-sections = 10  # number od sections the image is being devided (the resolution the the tracking)
+
+# OBS: always use a odd number
+sections = 11 # number of sections the image is being devided (the resolution the the tracking)
 
 # Precision: fraction of the screen size that the object been tracked can move without activating the camera movement
-x_precision = 0.6
-y_precision = 0.6
+x_precision = 0.5
+y_precision = 0.5
+
+# ---------------------------    calculated variables --------------------------------------------------------
+
+
+x_intervals_list = [int(i+ x_cam/sections) for i in np.arange(0, x_cam, x_cam/sections)]
+y_intervals_list = [int(i+ y_cam/sections) for i in np.arange(0, y_cam, y_cam/sections)]
+
+# for sections = 10
+# x_intervals_list = [64, 128, 192, 256, 320, 384, 448, 512, 576, 640]
+# y_intervals_list = [46, 92, 138, 184, 230, 276, 322, 368, 414, 460]
+
+x_prec_interval = (1 - x_precision)*sections/2
+y_prec_interval = (1 - y_precision)*sections/2
+
+# for x_precision = x_precision = 0.6 and sections = 10
+# x_prec_interval = x_prec_interval = 2
+
+x_section_size = x_intervals_list[0]
+y_section_size = y_intervals_list[0]
+
+x0 = int(x_cam/2 - x_prec_interval*x_section_size)
+x1 = int(x_cam/2 + x_prec_interval*x_section_size)
+y0 = int(y_cam/2 - y_prec_interval*y_section_size)
+y1 = int(y_cam/2 + y_prec_interval*y_section_size)
 
 
 # ---------------------------    serial port: python -> c++     ----------------------------------------------
-port = "/dev/ttyUSB0" # adapter
+port = "/dev/ttyUSB0" # USB-TTL adapter
 # port = "/dev/ttyACM0" # arduino
 
 ser = serial.Serial(port)
@@ -71,10 +97,6 @@ buffer_y = [5,5]
 
 
 
-
-x_intervals_list = [int(i+ x_cam/sections) for i in np.arange(0, x_cam, x_cam/sections)]
-y_intervals_list = [int(i+ y_cam/sections) for i in np.arange(0, y_cam, y_cam/sections)]
-
 def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_list):
     # gets the x and y coordenates of the hand
     x, y = coordinates
@@ -102,44 +124,62 @@ def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_
     return [x_interval, y_interval]
           
 
-          
+
+
 
 # ---------------------------- function that gets the coordinates --------------------------------
 def main_func():
-    # create the VIdeoCapture object from the webcam
+    
     # obs: 0: integrates webcam, 2: usb camera
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)  # create the VIdeoCapture object from the webcam
 
-    # getting the 
-    mphands = mp.solutions.hands
-    # objects hand
-    hands = mphands.Hands()
-    # function that draws landmarks and its lines
-    lms_drawer = mp.solutions.drawing_utils 
+    
+    mphands = mp.solutions.hands  # getting the  ???
+    hands = mphands.Hands()  # objects hand
+    lms_drawer = mp.solutions.drawing_utils  # function that draws landmarks and its lines
 
-    c_time = 0
-    p_time = 0
+    c_time = 0  # current time
+    p_time = 0  # previous time
 
     while True:
-        # get the frame
-        bool, frame = cap.read()
+        
+        bool, frame = cap.read()  # get the frame
+
         # convert the frame to RGB
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(rgb_frame)
 
-        # gets the hight, width and num of chanels of the frame
-        h, w, c = frame.shape
+        h, w, c = frame.shape  # gets the hight, width and num of chanels of the frame
+        
+        c_time = time.time()  # gets the curent time
+        fps = 1/(c_time - p_time)  # gets the fps         
+        p_time = c_time  # set the previous time equlas to the current time 
 
-        # gets the curent time
-        c_time = time.time()
-        # gets the fps
-        fps = 1/(c_time - p_time)
-        # set the previous time equlas to the current time 
-        p_time = c_time
-
-        # displays the fps on the screen 
-        cv2.putText(frame, f"FPS: {int(fps)}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+        cv2.putText(frame, f"FPS: {int(fps)}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)  # displays the fps on the screen 
+        
     
+        # loops that draw the grid
+        for i in y_intervals_list:  # loop to draw all lines parallel to the x axis
+            cv2.line(img=frame, pt1=(0, i), pt2=(x_cam, i), color=(255, 0, 0), thickness=1, lineType=8, shift=0)  # line in the x axis
+
+        for j in x_intervals_list:  # loop to draw all lines parallel to the y axis
+            cv2.line(img=frame, pt1=(j, 0), pt2=(j, y_cam), color=(255, 0, 0), thickness=1, lineType=8, shift=0)  # line in the y axis
+
+
+        # draw the center lines
+        cv2.line(img=frame, pt1=(0, int(y_cam/2)), pt2= (x_cam, int(y_cam/2)), color=(0, 0, 255), thickness=1, lineType=8, shift=0)  # line in the x axis
+        cv2.line(img=frame, pt1=(int(x_cam/2), 0), pt2=(int(x_cam/2), y_cam), color=(0, 0, 255), thickness=1, lineType=8, shift=0)  # line in the y axis
+
+        # draw the active tracking area (boundries of the precision area)
+
+        cv2.line(img=frame, pt1=(x1, y0), pt2=(x0, y0), color=(0, 0, 255), thickness=1, lineType=8, shift=0)  # line in the x axis
+        cv2.line(img=frame, pt1=(x0, y0), pt2=(x0, y1), color=(0, 0, 255), thickness=1, lineType=8, shift=0)  # line in the x axis
+        cv2.line(img=frame, pt1=(x0, y1), pt2=(x1, y1), color=(0, 0, 255), thickness=1, lineType=8, shift=0)  # line in the x axis
+        cv2.line(img=frame, pt1=(x1, y1), pt2=(x1, y0), color=(0, 0, 255), thickness=1, lineType=8, shift=0)  # line in the x axis
+        
+    
+
+
         # detect a hand (True if detects at least one)
         if results.multi_hand_landmarks:
             # iterates over the any detected hands
@@ -152,32 +192,42 @@ def main_func():
                                 
                 # gets and iterates the id and coordenates (in % of the screen) of each landmark 
                 for finger_id, lm in enumerate(hand_lms.landmark):
-                    # gets the coordenates of the landmark in PIXELS
-                    wp, hp = int(lm.x * w), int(lm.y * h)
-                    current_lm = [hand_id, finger_id, wp, hp]
+                    wp, hp = int(lm.x * w), int(lm.y * h)  
+                    current_lm = [hand_id, finger_id, wp, hp]  # gets the coordenates of the landmark in PIXELS
 
-                    # obs: the index finger tip is the landmark with the id = 8
-                    if current_lm[1] == 8:
+                    
+                    if current_lm[1] == 8: # obs: the index finger tip is the landmark with the id = 8
         
-                        # gets just the coordenates of the index finger tip
+                        
                         # OBS: If the value of the x coordinate is 0 it doens't apear on the variable xy because its on the left of the number 
-                        xy = current_lm[2:]
-                        # gets the intervals in the acreen of the finget tip
-                        intervals = get_interval(xy)
+                        xy = current_lm[2:]  # gets just the coordenates of the index finger tip
+                        intervals = get_interval(xy)  # gets the intervals in the acreen of the finget tip
                         #print(xy)
                         #print(intervals)
                         
+                        # A buffer was used because the previous version of the code sent values through serial only when the current position was different from the one before
                         del buffer_x[0] # removes the first element of the x list
                         buffer_x.append(intervals[0]) # adds the new value to the last x list position
                         del buffer_y[0] # removes the first element of the y list
                         buffer_y.append(intervals[1]) # adds the new value to the last y list position
 
 
+                        # Controls the x movement
+                        if (buffer_x[1]) >= ((sections - 1)/2 + x_prec_interval):  # if the object went left to the tracking area 
+                            ser.write(1) 
+                            print("1")
+                        elif (buffer_x[1]) <= ((sections - 1)/2 - x_prec_interval):  # if the object went right to the tracking area
+                            ser.write(2)
+                            print("2")
 
-                        if (abs(5 - buffer_x[1]) >= (1 - x_precision)*sections/2) | (abs(5 - buffer_y[1]) >= (1 - y_precision)*sections/2):
-                            # Sends the coordinates to the serial port
-                            ser.write(intervals)
-                            #print(intervals)
+                        # Controls the y movement
+                        elif (buffer_y[1]) >= ((sections - 1)/2 + y_prec_interval):  # if the object went down to the tracking area
+                            ser.write(3)
+                            print("3")
+                        elif (buffer_y[1]) <= ((sections - 1)/2 - y_prec_interval):  # if the object went up to the tracking area
+                            ser.write(4)
+                            print("4")
+
                                                     
                             
 
@@ -200,4 +250,6 @@ def main_func():
 
 if __name__ == "__main__":
     main_func()
+    
 
+    
