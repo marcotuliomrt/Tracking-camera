@@ -214,19 +214,35 @@ def main_func():
 
                         # Controls the x movement
                         if (buffer_x[1]) >= ((sections - 1)/2 + x_prec_interval):  # if the object went left to the tracking area 
-                            ser.write(1) 
-                            print("1")
+                            if (buffer_x[1] != buffer_x[0]): # if the object is moving -> ensures the values is gonna be sent only once so the controller buffer doenst get full
+                            # Sends the coordinates to the serial port
+                                ser.write(str.encode('1')) 
+                                print("1")
+
                         elif (buffer_x[1]) <= ((sections - 1)/2 - x_prec_interval):  # if the object went right to the tracking area
-                            ser.write(2)
-                            print("2")
+                            if (buffer_x[1] != buffer_x[0]):
+                            # Sends the coordinates to the serial port
+                                ser.write(str.encode('2'))
+                                print("2")
 
                         # Controls the y movement
                         elif (buffer_y[1]) >= ((sections - 1)/2 + y_prec_interval):  # if the object went down to the tracking area
-                            ser.write(3)
-                            print("3")
+                            if (buffer_y[1] != buffer_y[0]):
+                            # Sends the coordinates to the serial port
+                                ser.write(str.encode('3'))
+                                print("3")
                         elif (buffer_y[1]) <= ((sections - 1)/2 - y_prec_interval):  # if the object went up to the tracking area
-                            ser.write(4)
-                            print("4")
+                            if (buffer_y[1] != buffer_y[0]):
+                            # Sends the coordinates to the serial port
+                                ser.write(str.encode('4'))
+                                print("4")
+
+                        else:  # ensures the camera stops when the object gets recentered
+                            if (buffer_y[1] != buffer_y[0]):
+                            # Sends the coordinates to the serial port
+                                ser.write(str.encode('0'))
+                                print("0")
+
 
                                                     
                             
