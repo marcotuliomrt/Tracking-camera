@@ -49,7 +49,16 @@ port = "/dev/ttyUSB0" # USB-TTL adapter
 
 ser = serial.Serial(port)
 print("port: "+port)
-ser.baudrate=115200
+ser.baudrate= 9600
+
+# ---------------------------     func that sends the data   -------------------------------------------------
+
+# sends the data and prints on the terminal
+def serial_send(data):
+    data = data.encode('ascii')
+    print(data)
+    ser.write(data)
+    time.sleep(0.05)
 
 
 # ---------------------------     frame sections        ------------------------------------------------------
@@ -115,13 +124,15 @@ def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_
             # gets the y interval
             y_interval = j
             break
-    #    list variable
-    #interval = [x_interval, y_interval]
-    #    concatenated variable to send both coorsinates simultaneously to the serial
-    # interval = int(str(x_interval) + str(y_interval))
-
+    
+    # Code to use with arduino
+    interval = int(str(x_interval) + str(y_interval))  # concatenated variable to send both coorsinates simultaneously to the serial
     # Obs: the var "interval" must be a list, otherwise it apears just zeros on the serial monitor of the ardiuno
-    return [x_interval, y_interval]
+    # return [interval]
+
+    # # Code to use with st nucleo
+    return [x_interval, y_interval, [interval]]
+
           
 
 
@@ -216,32 +227,35 @@ def main_func():
                         if (buffer_x[1]) >= ((sections - 1)/2 + x_prec_interval):  # if the object went left to the tracking area 
                             if (buffer_x[1] != buffer_x[0]): # if the object is moving -> ensures the values is gonna be sent only once so the controller buffer doenst get full
                             # Sends the coordinates to the serial port
-                                ser.write(str.encode('1')) 
-                                print("1")
+                                serial_send('1')
+
 
                         elif (buffer_x[1]) <= ((sections - 1)/2 - x_prec_interval):  # if the object went right to the tracking area
                             if (buffer_x[1] != buffer_x[0]):
                             # Sends the coordinates to the serial port
-                                ser.write(str.encode('2'))
-                                print("2")
+                                serial_send('2')
+
 
                         # Controls the y movement
                         elif (buffer_y[1]) >= ((sections - 1)/2 + y_prec_interval):  # if the object went down to the tracking area
                             if (buffer_y[1] != buffer_y[0]):
                             # Sends the coordinates to the serial port
-                                ser.write(str.encode('3'))
-                                print("3")
+                                serial_send('3')
+
+
                         elif (buffer_y[1]) <= ((sections - 1)/2 - y_prec_interval):  # if the object went up to the tracking area
                             if (buffer_y[1] != buffer_y[0]):
                             # Sends the coordinates to the serial port
-                                ser.write(str.encode('4'))
-                                print("4")
+                                serial_send('4')
+
 
                         else:  # ensures the camera stops when the object gets recentered
-                            if (buffer_y[1] != buffer_y[0]):
+                            if (buffer_x[1] != buffer_x[0]) or (buffer_y[1] != buffer_y[0]):
                             # Sends the coordinates to the serial port
-                                ser.write(str.encode('0'))
-                                print("0")
+                                serial_send('0')
+                    
+
+
 
 
                                                     
