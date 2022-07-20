@@ -18,6 +18,8 @@ sections = 11 # number of sections the image is being devided (the resolution th
 x_precision = 0.5
 y_precision = 0.5
 
+camera_index = 0 # obs: 0: integrates webcam, 2: usb camera
+
 # ---------------------------    calculated variables --------------------------------------------------------
 
 
@@ -142,9 +144,11 @@ def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_
 def main_func():
     
     # obs: 0: integrates webcam, 2: usb camera
-    cap = cv2.VideoCapture(0)  # create the VIdeoCapture object from the webcam
+    cap = cv2.VideoCapture(camera_index)  # create the VIdeoCapture object from the webcam
 
     
+    
+
     mphands = mp.solutions.hands  # getting the  ???
     hands = mphands.Hands()  # objects hand
     lms_drawer = mp.solutions.drawing_utils  # function that draws landmarks and its lines
@@ -153,8 +157,10 @@ def main_func():
     p_time = 0  # previous time
 
     while True:
-        
+
         bool, frame = cap.read()  # get the frame
+
+        frame = cv2.rotate(frame, cv2.ROTATE_180)
 
         # convert the frame to RGB
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
