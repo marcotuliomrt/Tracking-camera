@@ -18,7 +18,7 @@ sections = 11 # number of sections the image is being devided (the resolution th
 x_precision = 0.5
 y_precision = 0.5
 
-camera_index = 0 # obs: 0: integrates webcam, 2: usb camera
+camera_index = 2 # obs:    0: integrates webcam,     2: usb camera
 
 # ---------------------------    calculated variables --------------------------------------------------------
 
@@ -258,16 +258,6 @@ def main_func():
                             # Sends the coordinates to the serial port
                                 serial_send('5')
                     
-
-
-
-
-                                                    
-                            
-
-                        
-
-
 
         # set the condition of manual brake by pressing "q" on the keyboard  
         if cv2.waitKey(1) & 0xFF==ord("k"):
