@@ -224,17 +224,15 @@ def main_func():
 
 
                         # Controls the x movement
-                        if (buffer_x[1]) >= ((sections - 1)/2 + x_prec_interval):  # if the object went left to the tracking area 
-                            if (buffer_x[1] != buffer_x[0]): # if the object is moving -> ensures the values is gonna be sent only once so the controller buffer doenst get full
+                        if (buffer_x[1]) <= ((sections - 1)/2 - x_prec_interval):  # if the object went right to the tracking area
+                            if (buffer_x[1] != buffer_x[0]):
                             # Sends the coordinates to the serial port
                                 serial_send('1')
 
-
-                        elif (buffer_x[1]) <= ((sections - 1)/2 - x_prec_interval):  # if the object went right to the tracking area
-                            if (buffer_x[1] != buffer_x[0]):
+                        elif (buffer_x[1]) >= ((sections - 1)/2 + x_prec_interval):  # if the object went left to the tracking area 
+                            if (buffer_x[1] != buffer_x[0]): # if the object is moving -> ensures the values is gonna be sent only once so the controller buffer doenst get full
                             # Sends the coordinates to the serial port
                                 serial_send('2')
-
 
                         # Controls the y movement
                         elif (buffer_y[1]) >= ((sections - 1)/2 + y_prec_interval):  # if the object went down to the tracking area
@@ -248,11 +246,11 @@ def main_func():
                             # Sends the coordinates to the serial port
                                 serial_send('4')
 
-
+                        # Stops the movement
                         else:  # ensures the camera stops when the object gets recentered
                             if (buffer_x[1] != buffer_x[0]) or (buffer_y[1] != buffer_y[0]):
                             # Sends the coordinates to the serial port
-                                serial_send('0')
+                                serial_send('5')
                     
 
 
