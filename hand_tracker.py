@@ -53,7 +53,7 @@ ser = serial.Serial(port)
 print("port: "+port)
 ser.baudrate= 9600
 
-# ---------------------------     func that sends the data   -------------------------------------------------
+# ---------------------------     func that sends the data through serial  -----------------------------------
 
 # sends the data and prints on the terminal
 def serial_send(data):
@@ -65,50 +65,12 @@ def serial_send(data):
 
 # ---------------------------     frame sections        ------------------------------------------------------
 
-buffer_x = [5,5]
-buffer_y = [5,5]
-
-# x_intervals_list = [int(i) for i in np.arange(0, x_cam, x_cam/sections)] + [x_cam]
-# y_intervals_list = [int(i) for i in np.arange(0, y_cam, y_cam/sections)] + [y_cam]
-# function that get the intervals of the index finger tip
-# def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_list):
-#     # gets the x and y coordenates of the hand
-#     x, y = coordinates
-#     # iterates over the x intervals
-#     for i in range(len(x_inter)):
-#         # if the x coordenate is between the interval
-#         if x > x_inter[i] and x < x_inter[i+1]:
-#             # gets the x interval
-#             x_interval = i
-
-
-#             # iterates over the x intervals
-#             for j in range(len(y_inter)):
-#                 # if the y coordenate is between the interval
-#                 if y > y_inter[j] and y < y_inter[j+1]:
-#                     # gets the y interval
-#                     y_interval = j
-
-#                     interval = [x_interval, y_interval]
-
-#     return interval
-          
- 
-#   9 8 7 6 5 4 3 2 1 0
-#                      0
-#                      1
-#                      2
-#        screen        3
-#       intervals      4
-#        matrix        5
-#                      6
-#                      7
-#                      8
-#                      9
-
-
+buffer_x = [sections/2, sections/2]
+buffer_y = [sections/2,sections/2]
 
 def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_list):
+    x_interval = sections # varibles declared on the function scope so it doenst give the error: UnboundLocalError: local variable 'y_interval' referenced before assignment
+    y_interval = sections
     # gets the x and y coordenates of the hand
     x, y = coordinates
     # iterates over the x intervals
@@ -127,17 +89,24 @@ def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_
             y_interval = j
             break
     
-    # Code to use with arduino
-    interval = int(str(x_interval) + str(y_interval))  # concatenated variable to send both coorsinates simultaneously to the serial
     # Obs: the var "interval" must be a list, otherwise it apears just zeros on the serial monitor of the ardiuno
     # return [interval]
 
     # # Code to use with st nucleo
-    return [x_interval, y_interval, [interval]]
+    return [x_interval, y_interval] 
 
-          
-
-
+#                      0
+#                      1
+#                      2
+#        screen        3
+#       intervals      4
+#        matrix        5
+#                      6
+#                      7
+#                      8
+#                      9
+#   0 1 2 3 4 5 6 7 8 9
+  
 
 
 # ---------------------------- function that gets the coordinates --------------------------------
@@ -160,7 +129,8 @@ def main_func():
 
         bool, frame = cap.read()  # get the frame
 
-        frame = cv2.rotate(frame, cv2.ROTATE_180)
+        if camera_index == 2:
+            frame = cv2.rotate(frame, cv2.ROTATE_180)
 
         # convert the frame to RGB
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -220,7 +190,8 @@ def main_func():
                         xy = current_lm[2:]  # gets just the coordenates of the index finger tip
                         intervals = get_interval(xy)  # gets the intervals in the acreen of the finget tip
                         #print(xy)
-                        #print(intervals)
+                        #print(intervals[0])
+                        #print(intervals[1])
                         
                         # A buffer was used because the previous version of the code sent values through serial only when the current position was different from the one before
                         del buffer_x[0] # removes the first element of the x list
