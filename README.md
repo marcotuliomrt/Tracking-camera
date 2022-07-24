@@ -1,12 +1,17 @@
 # Tracking-camera
-A camera that redirects itself to center the image on predefined objects]
+A camera that redirects itself to center predefined target object on the screen. The hand_tracker.py scripts tracks specifically the index finger tip.
 
 ## How it works 
-The camera mounted on a base buil on 2 servo motors tracks objects. More specifically, a python script runs on the PC processing images from the camera and sends values through UART to the microcontroller that controls the servo motors, which redirects the camera so the object being tracked stays on the center os the image.
+The camera mounted on a base buil on 2 servo motors follows predefined objects. More specifically, a python script runs on the PC processing images from the camera, gets the coordinates of a desired point and sends some values through UART to the microcontroller that controls the servo motors, which redirects the camera so the object being tracked stays on the center os the image.
 ### - Image processing
-### - Pyhton and cpp integration
+The purpose of the image processing is just to get the coordinates of the desired point in real time. Then, the coordinates enter a function that generate 5 types of values, one tells the microcontroller to move the camera up, the other value to move it down,... left, right, and stop the camera where it is.
 ### - Hardware
+The hardware is the simplest possible, l
 ### - What can be personalized 
+On the hand_tracker.py, which tracks the index finger tip, its possible to change:
+- The camera that is gonna be used: CAM_INDEX
+- The number of section the ima is gonna be devided
+- The precision of the tracking 
 
 ## Usage
 
