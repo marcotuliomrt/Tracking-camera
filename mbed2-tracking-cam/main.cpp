@@ -1,4 +1,3 @@
-
 //************************************************************************
 //* 20-07-2022
 //* Tracking-camera Marco_Tulio_Masselli
@@ -45,9 +44,9 @@ int main() {
  
     while(1){
 
-        if(state == 1){
-            pc.printf("state = 1\n");
-            wait(0.1);
+            // if(state == 1){
+            // pc.printf("state = 1\n");
+            // wait(0.1);
             while(state == 1){
                 if(CSTEP_x < (MAX-OFFSET)){
                     servo_x.pulsewidth_us(CSTEP_x + STEP);
@@ -55,10 +54,10 @@ int main() {
                     wait(0.01);
                     }
                 }
-        }
-        if(state == 2){
-            pc.printf("state = 2\n");
-            wait(0.1);
+        // }
+        // if(state == 2){
+        //     pc.printf("state = 2\n");
+        //     wait(0.1);
             while(state == 2){
                 if(CSTEP_x > (MIN+OFFSET)){
                     servo_x.pulsewidth_us(CSTEP_x - STEP);
@@ -66,10 +65,10 @@ int main() {
                     wait(0.01);
                     }
                 }
-        }
-        if(state == 3){
-            pc.printf("state = 3\n");
-            wait(0.1);
+        // }
+        // if(state == 3){
+        //     pc.printf("state = 3\n");
+        //     wait(0.1);
             while(state == 3){
                 if(CSTEP_y < (MAX-OFFSET)){
                 servo_y.pulsewidth_us(CSTEP_y + STEP);
@@ -77,10 +76,10 @@ int main() {
                 wait(0.01);
                 }
             }
-        }
-        if(state == 4){
-            pc.printf("state = 4\n");
-            wait(0.1);
+        // }
+        // if(state == 4){
+        //     pc.printf("state = 4\n");
+        //     wait(0.1);
             while(state == 4){
                 if(CSTEP_y > (MIN+OFFSET)){
                     servo_y.pulsewidth_us(CSTEP_y - STEP);
@@ -88,15 +87,14 @@ int main() {
                     wait(0.01);
                     }
                 }
-        }
-        if(state == 5){
-            wait(1);
-        }
+            }
+        // }
+  
         
     }
     
 
-}
+
 
 
 
@@ -126,9 +124,7 @@ void calibrate(){
     servo_y.pulsewidth_us(MID);
     
     wait(0.5);
-    
-    
-    
+
     }
 
 
@@ -143,38 +139,31 @@ void Rx_interrupt() // function that receives the outputs from the python script
     // rx_line receives hte value of the char from the buffer of the "python" device
     rx_line = python.getc();
     
-    switch(rx_line) 
-    {
+  
 
-        case '1':
+        if (rx_line == '1'){
             state = 1;
             rx_line = 0x00;
-            break;
+            }
 
-        case '2':
+        else if (rx_line == '2'){
             state = 2;
             rx_line = 0x00;
-            break;
-            
-        case '3':
+            }
+
+        else if (rx_line == '3'){
             state = 3;
             rx_line = 0x00;
-            break;
-            
-        case '4':
+            }
+
+        else if (rx_line == '4'){
             state = 4;
             rx_line = 0x00;
-            break;
-            
-        case '5':
+            }
+
+        else if (rx_line == '5'){
             state = 5;
             rx_line = 0x00;
-            break;
-            
-            
-            
-            default: rx_line=0;
+        }
 
-    }
-    return;
 }
