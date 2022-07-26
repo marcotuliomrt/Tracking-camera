@@ -19,6 +19,9 @@ x_precision = 0.5
 y_precision = 0.5
 
 camera_index = 2 # obs:    0: integrates webcam,     2: usb camera
+#port = "/dev/ttyUSB0" # USB-TTL adapter
+port = "/dev/ttyACM0" # directly to through the board cable
+
 
 # ---------------------------    calculated variables --------------------------------------------------------
 
@@ -46,8 +49,7 @@ y1 = int(y_cam/2 + y_prec_interval*y_section_size)
 
 
 # ---------------------------    serial port: python -> c++     ----------------------------------------------
-port = "/dev/ttyUSB0" # USB-TTL adapter
-# port = "/dev/ttyACM0" # arduino
+
 
 ser = serial.Serial(port)
 print("port: "+port)
@@ -63,7 +65,7 @@ def serial_send(data):
     time.sleep(0.05)
 
 
-# ---------------------------     frame sections        ------------------------------------------------------
+# ---------------------------     func tha gets the interval of the current position of the target        ------------------------------------------------------
 
 buffer_x = [sections/2, sections/2]
 buffer_y = [sections/2,sections/2]
@@ -109,7 +111,7 @@ def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_
   
 
 
-# ---------------------------- function that gets the coordinates --------------------------------
+# ---------------------------- function that return the movement orders --------------------------------
 def main_func():
     
     # obs: 0: integrates webcam, 2: usb camera
@@ -245,6 +247,4 @@ def main_func():
 
 if __name__ == "__main__":
     main_func()
-    
-
     
