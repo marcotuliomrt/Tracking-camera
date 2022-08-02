@@ -1,3 +1,4 @@
+
 # https://www.youtube.com/watch?v=NZde8Xt78Iw
 
 import cv2
@@ -12,31 +13,31 @@ x_cam = 640  # image width
 y_cam = 460  # image lengh 
 
 # OBS: always use a odd number
-sections = 11 # number of sections the image is being devided (the resolution the the tracking)
+SECTIONS = 11 # number of SECTIONS the image is being devided (the resolution the the tracking)
 
 # Precision: fraction of the screen size that the object been tracked can move without activating the camera movement
-x_precision = 0.5
-y_precision = 0.5
+X_PRECISION = 0.5
+Y_PRECISION = 0.5
 
-camera_index = 2 # obs:    0: integrates webcam,     2: usb camera
-#port = "/dev/ttyUSB0" # USB-TTL adapter
-port = "/dev/ttyACM0" # directly to through the board cable
+CAM_INDEX = 2 # obs:    0: integrates webcam,     2: usb camera
+#PORT = "/dev/ttyUSB0" # USB-TTL adapter
+PORT = "/dev/ttyACM0" # directly to through the board cable
 
 
 # ---------------------------    calculated variables --------------------------------------------------------
 
 
-x_intervals_list = [int(i+ x_cam/sections) for i in np.arange(0, x_cam, x_cam/sections)]
-y_intervals_list = [int(i+ y_cam/sections) for i in np.arange(0, y_cam, y_cam/sections)]
+x_intervals_list = [int(i+ x_cam/SECTIONS) for i in np.arange(0, x_cam, x_cam/SECTIONS)]
+y_intervals_list = [int(i+ y_cam/SECTIONS) for i in np.arange(0, y_cam, y_cam/SECTIONS)]
 
-# for sections = 10
+# for SECTIONS = 10
 # x_intervals_list = [64, 128, 192, 256, 320, 384, 448, 512, 576, 640]
 # y_intervals_list = [46, 92, 138, 184, 230, 276, 322, 368, 414, 460]
 
-x_prec_interval = (1 - x_precision)*sections/2
-y_prec_interval = (1 - y_precision)*sections/2
+x_prec_interval = (1 - X_PRECISION)*SECTIONS/2
+y_prec_interval = (1 - Y_PRECISION)*SECTIONS/2
 
-# for x_precision = x_precision = 0.6 and sections = 10
+# for X_PRECISION = X_PRECISION = 0.6 and SECTIONS = 10
 # x_prec_interval = x_prec_interval = 2
 
 x_section_size = x_intervals_list[0]
@@ -48,11 +49,11 @@ y0 = int(y_cam/2 - y_prec_interval*y_section_size)
 y1 = int(y_cam/2 + y_prec_interval*y_section_size)
 
 
-# ---------------------------    serial port: python -> c++     ----------------------------------------------
+# ---------------------------    serial PORT: python -> c++     ----------------------------------------------
 
 
-ser = serial.Serial(port)
-print("port: "+port)
+ser = serial.Serial(PORT)
+print("PORT: "+PORT)
 ser.baudrate= 9600
 
 # ---------------------------     func that sends the data through serial  -----------------------------------
@@ -67,12 +68,12 @@ def serial_send(data):
 
 # ---------------------------     func tha gets the interval of the current position of the target        ------------------------------------------------------
 
-buffer_x = [sections/2, sections/2]
-buffer_y = [sections/2,sections/2]
+buffer_x = [SECTIONS/2, SECTIONS/2]
+buffer_y = [SECTIONS/2,SECTIONS/2]
 
 def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_list):
-    x_interval = sections # varibles declared on the function scope so it doenst give the error: UnboundLocalError: local variable 'y_interval' referenced before assignment
-    y_interval = sections
+    x_interval = SECTIONS # varibles declared on the function scope so it doenst give the error: UnboundLocalError: local variable 'y_interval' referenced before assignment
+    y_interval = SECTIONS
     # gets the x and y coordenates of the hand
     x, y = coordinates
     # iterates over the x intervals
@@ -115,7 +116,7 @@ def get_interval(coordinates, x_inter = x_intervals_list, y_inter = y_intervals_
 def main_func():
     
     # obs: 0: integrates webcam, 2: usb camera
-    cap = cv2.VideoCapture(camera_index)  # create the VIdeoCapture object from the webcam
+    cap = cv2.VideoCapture(CAM_INDEX)  # create the VIdeoCapture object from the webcam
 
     
     
@@ -131,7 +132,7 @@ def main_func():
 
         bool, frame = cap.read()  # get the frame
 
-        if camera_index == 2:
+        if CAM_INDEX == 2:
             frame = cv2.rotate(frame, cv2.ROTATE_180)
 
         # convert the frame to RGB
@@ -203,32 +204,32 @@ def main_func():
 
 
                         # Controls the x movement
-                        if (buffer_x[1]) <= ((sections - 1)/2 - x_prec_interval):  # if the object went right to the tracking area
+                        if (buffer_x[1]) <= ((SECTIONS - 1)/2 - x_prec_interval):  # if the object went right to the tracking area
                             if (buffer_x[1] != buffer_x[0]):
-                            # Sends the coordinates to the serial port
+                            # Sends the coordinates to the serial PORT
                                 serial_send('1')
 
-                        elif (buffer_x[1]) >= ((sections - 1)/2 + x_prec_interval):  # if the object went left to the tracking area 
+                        elif (buffer_x[1]) >= ((SECTIONS - 1)/2 + x_prec_interval):  # if the object went left to the tracking area 
                             if (buffer_x[1] != buffer_x[0]): # if the object is moving -> ensures the values is gonna be sent only once so the controller buffer doenst get full
-                            # Sends the coordinates to the serial port
+                            # Sends the coordinates to the serial PORT
                                 serial_send('2')
 
                         # Controls the y movement
-                        elif (buffer_y[1]) >= ((sections - 1)/2 + y_prec_interval):  # if the object went down to the tracking area
+                        elif (buffer_y[1]) >= ((SECTIONS - 1)/2 + y_prec_interval):  # if the object went down to the tracking area
                             if (buffer_y[1] != buffer_y[0]):
-                            # Sends the coordinates to the serial port
+                            # Sends the coordinates to the serial PORT
                                 serial_send('3')
 
 
-                        elif (buffer_y[1]) <= ((sections - 1)/2 - y_prec_interval):  # if the object went up to the tracking area
+                        elif (buffer_y[1]) <= ((SECTIONS - 1)/2 - y_prec_interval):  # if the object went up to the tracking area
                             if (buffer_y[1] != buffer_y[0]):
-                            # Sends the coordinates to the serial port
+                            # Sends the coordinates to the serial PORT
                                 serial_send('4')
 
                         # Stops the movement
                         else:  # ensures the camera stops when the object gets recentered
                             if (buffer_x[1] != buffer_x[0]) or (buffer_y[1] != buffer_y[0]):
-                            # Sends the coordinates to the serial port
+                            # Sends the coordinates to the serial PORT
                                 serial_send('5')
                     
 
